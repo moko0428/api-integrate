@@ -1,33 +1,28 @@
 import axios from "axios";
-import React, { useReducer, useEffect } from "react";
+import React from "react";
 import useAsync from "./useAsync";
 
-async function getUsers() {
+async function getUser(id) {
   const response = await axios.get(
-    `https://jsonplaceholder.typicode.com/users`
+    `https://jsonplaceholder.typicode.com/users/${id}`
   );
   return response.data;
 }
 
-const User = () => {
-  const [state, refetch] = useAsync(getUsers, []);
+const User = ({ id }) => {
+  const [state] = useAsync(() => getUser(id), [id]);
+  const { loading, data: user, error } = state;
 
-  const { loading, data: users, error } = state; //state.data 를 users 키워드로 조회
-
-  if (loading) return <div>로딩 중...</div>;
+  if (loading) return <div>로딩중...</div>;
   if (error) return <div>에러가 발생했습니다.</div>;
-  if (!users) return null;
+  if (!user) return null;
   return (
-    <>
-      <ul>
-        {users.map((user) => (
-          <li key={user.id}>
-            {user.username}({user.name})
-          </li>
-        ))}
-      </ul>
-      <button onClick={refetch}>다시 불러오기</button>
-    </>
+    <div>
+      <h2>{user.username}</h2>
+      <p>
+        <b>Email:</b> {user.email}
+      </p>
+    </div>
   );
 };
 

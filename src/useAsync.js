@@ -25,7 +25,7 @@ const reducer = (state, action) => {
   }
 };
 
-const useAsync = (callback, deps = []) => {
+const useAsync = (callback, deps = [], skip = false) => {
   const [state, dispatch] = useReducer(reducer, {
     loading: false,
     data: null,
@@ -42,6 +42,7 @@ const useAsync = (callback, deps = []) => {
     }
   };
   useEffect(() => {
+    if (skip) return;
     fetchData();
     //esLint 설정을 다음 줄에서만 비활성화
   }, deps);
