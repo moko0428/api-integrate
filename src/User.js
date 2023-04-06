@@ -1,32 +1,55 @@
 import axios from "axios";
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useReducer, useEffect } from "react";
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "LOADING":
+      return {
+        loading: true,
+        data: null,
+        error: null,
+      };
+    case "SUCCESS":
+      return {
+        loading: false,
+        data: action.data,
+        error: null,
+      };
+    case "ERROR":
+      return {
+        loading: false,
+        data: null,
+        error: action.error,
+      };
+    default:
+      throw new Error(`Unhandled action type: ${action.type}`);
+  }
+};
 
 const User = () => {
-  const [users, setUsers] = useState(null);
-  const [loading, setLoding] = useState(false);
-  const [error, setEror] = useState(null);
+  const [state, dispatch] = useReducer(reducer, {
+    loading: false,
+    data: null,
+    error: null,
+  });
 
   const fetchUsers = async () => {
+    dispatch({ type: "LOADING" });
     try {
-      //요청이 시작할 땐 error와 users를 초기화하고
-      setEror(null);
-      setUsers(null);
-      setLoding(true);
       const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
+        `https://jsonplaceholder.typicode.com/users`
       );
-      setUsers(response.data); //데이터는 reponse.data안에 들어있음.
+      dispatch({ type: "SUCCESS", data: response.data });
     } catch (e) {
-      setEror(e);
+      dispatch({ type: "ERROR", error: e });
     }
-    setLoding(false);
   };
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  const { loading, data: users, error } = state; //state.data 를 users 키워드로 조회
 
   if (loading) return <div>로딩 중...</div>;
   if (error) return <div>에러가 발생했습니다.</div>;
